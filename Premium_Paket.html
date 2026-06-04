@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sevgiliye Özel VIP Hediye</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- TEMEL & VIP ARKA PLAN (Hareketli Gradient) --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { 
+            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #fbc2eb, #a18cd1);
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            min-height: 100vh; display: flex; justify-content: center; align-items: flex-start;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .app-container { width: 100%; max-width: 450px; min-height: 100vh; background: transparent; position: relative; display: flex; flex-direction: column; z-index: 10; }
+
+        /* YUKARIDAN DÜŞEN KALPLER EFEKTİ */
+        .heart-fall { position: fixed; top: -10vh; font-size: 1.5rem; color: rgba(255, 255, 255, 0.6); animation: fall linear infinite; z-index: 1; pointer-events: none; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        /* --- 1. ŞİFRE EKRANI --- */
+        #login-screen {
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px;
+            height: 100vh; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px);
+            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 25px; text-align: center; color: #fff; transition: opacity 0.5s ease;
+        }
+        .login-title { font-family: 'Dancing Script', cursive; font-size: 4rem; margin-bottom: 20px; font-weight: 700; text-shadow: 0 4px 15px rgba(255,105,135,0.5); }
+        .login-subtitle { font-size: 1rem; font-weight: 300; line-height: 1.6; margin-bottom: 25px; padding: 0 15px; }
+        .input-wrapper { position: relative; width: 100%; max-width: 340px; margin-top: 15px;}
+        .input-wrapper input {
+            width: 100%; padding: 16px 110px 16px 25px; border-radius: 35px;
+            border: 2px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1);
+            color: #fff; font-size: 1rem; outline: none; backdrop-filter: blur(5px);
+        }
+        .input-wrapper input::placeholder { color: rgba(255, 255, 255, 0.8); }
+        .input-wrapper .action-btn {
+            position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); color: #fff; border: none; padding: 10px 22px;
+            border-radius: 30px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+        }
+
+        /* --- 2. ANA İÇERİK & VIP BUZLU CAM KARTLAR --- */
+        #main-content { display: none; width: 100%; padding: 20px 15px; }
+
+        .love-card {
+            background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 20px; padding: 30px 15px; margin-bottom: 25px; 
+            text-align: center; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); position: relative;
+        }
+        
+        .card-heading { font-family: 'Dancing Script', cursive; font-size: 2.8rem; color: #ff4b72; margin-bottom: 5px; text-shadow: 0 2px 5px rgba(255, 255, 255, 0.8); }
+        .heading-line { width: 65px; height: 3px; background: #ff4b72; margin: 0 auto 25px; border-radius: 2px; }
+
+        /* Sayaç */
+        .countdown-row { display: flex; justify-content: space-between; margin: 25px 0; }
+        .countdown-box {
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); color: white; width: 23%; padding: 15px 5px;
+            border-radius: 12px; box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4);
+        }
+        .countdown-value { font-size: 1.6rem; font-weight: 600; }
+        .countdown-label { font-size: 0.70rem; text-transform: uppercase; font-weight: 500; margin-top: 2px; }
+
+        /* Özel Video Alanı */
+        .custom-video-wrapper { position: relative; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); background: #000; }
+        .custom-video-wrapper video { width: 100%; display: block; border-radius: 15px; }
+
+        /* Zaman Çizelgesi (Timeline) */
+        .timeline-container { border-left: 3px solid #ff7eb3; padding-left: 20px; text-align: left; margin: 10px 10px; }
+        .timeline-item { position: relative; margin-bottom: 25px; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -28.5px; top: 0; width: 14px; height: 14px;
+            background: #ff4b72; border-radius: 50%; box-shadow: 0 0 10px rgba(255,75,114,0.5);
+        }
+        .timeline-date { font-size: 0.85rem; color: #ff4b72; font-weight: 700; margin-bottom: 3px; }
+        .timeline-title { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .timeline-img { width: 100%; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); border: 2px solid white; }
+
+        /* Çoğaltılmış Fotoğraf Galerisi (Grid) */
+        .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .photo-grid img { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid rgba(255,255,255,0.8); }
+
+        /* --- YENİ EKLENEN: AŞK MEKTUBU STİLLERİ --- */
+        .text-letter-body { text-align: justify; padding: 0 5px; }
+        .text-letter-body p { font-size: 0.95rem; color: #333; line-height: 1.8; margin-bottom: 15px; font-weight: 500; text-indent: 12px; }
+        .special-ask { font-weight: 700; color: #ff4b72; font-size: 1.15rem; margin-top: 20px; text-align: center; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); }
+
+        /* Zarf Butonları */
+        .envelope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .env-btn {
+            background: rgba(255, 255, 255, 0.8); border: 1px solid #ff7eb3; color: #ff4b72;
+            padding: 12px 5px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.3s;
+        }
+        .env-btn i { font-size: 1.5rem; }
+        .env-btn:hover, .env-btn:active { background: #ff7eb3; color: white; }
+
+        /* Büyük Sürpriz Butonu */
+        .big-surprise-btn {
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+            color: white; border: none; padding: 15px 30px; border-radius: 30px;
+            font-size: 1.2rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: 25px;
+            box-shadow: 0 8px 20px rgba(255, 8, 68, 0.4);
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+
+        /* Modallar */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 10000; justify-content: center; align-items: center; }
+        .modal-content { background: transparent; padding: 10px; width: 90%; max-width: 350px; text-align: center; position: relative; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
+        .polaroid-wrapper { background: #fff; padding: 15px 15px 35px 15px; border-radius: 4px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); transform: rotate(-4deg); position: relative; margin-bottom: 15px; }
+        .polaroid-img { width: 100%; height: auto; border-radius: 2px; }
+        .polaroid-caption { font-family: 'Dancing Script', cursive; font-size: 1.8rem; color: #4b3839; position: absolute; bottom: -5px; left: 0; width: 100%; text-align: center; }
+        
+        .note-card { background: #fff; padding: 30px 20px; border-radius: 15px; font-size: 1.1rem; color: #333; line-height: 1.6; position: relative; font-family: 'Dancing Script', cursive; font-size: 1.8rem;}
+        .close-modal-btn { position: absolute; top: -15px; right: -15px; background: #ff4b72; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10001; }
+
+        .copyright-bar { text-align: center; padding: 25px 15px; font-size: 0.8rem; margin-top: auto; color: rgba(255,255,255,0.7); }
+    </style>
+</head>
+<body>
+
+    <div id="hearts-container"></div>
+
+    <div class="app-container">
+
+        <div id="login-screen">
+            <h1 class="login-title">Ayşe 🤍 Ali </h1>
+            <p class="login-subtitle">Sana özel hazırladığım bu dünyaya girmek için şifreni yaz...</p>
+            <div class="input-wrapper">
+                <input type="password" id="secretKey" placeholder="Şifre (15haziran)">
+                <button id="submit-btn" onclick="validateKey()" class="action-btn"><i class="fa-solid fa-heart"></i></button>
+            </div>
+            <div id="wrongNotice" style="display:none; color:#ffb199; margin-top:15px; font-size:0.9rem;">Yanlış şifre sevgilim, tekrar dene 🥺</div>
+        </div>
+
+        <div id="main-content">
+
+            <div class="love-card">
+                <h2 class="card-heading">Sonsuzluğumuz</h2>
+                <div class="heading-line"></div>
+                <div class="countdown-row">
+                    <div class="countdown-box"><div id="val-days" class="countdown-value">00</div><div class="countdown-label">Gün</div></div>
+                    <div class="countdown-box"><div id="val-hours" class="countdown-value">00</div><div class="countdown-label">Saat</div></div>
+                    <div class="countdown-box"><div id="val-mins" class="countdown-value">00</div><div class="countdown-label">Dakika</div></div>
+                    <div class="countdown-box"><div id="val-secs" class="countdown-value">00</div><div class="countdown-label">Saniye</div></div>
+                </div>
+            </div>
+
+            <!-- VİDEO BÖLÜMÜ -->
+            <div class="love-card">
+                <h2 class="card-heading">Bizim Videomuz</h2>
+                <div class="heading-line"></div>
+                <div class="custom-video-wrapper">
+                    <video controls poster="https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=500&q=80">
+                        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                        Tarayıcınız video oynatmayı desteklemiyor.
+                    </video>
+                </div>
+            </div>
+
+            <!-- ZAMAN ÇİZELGESİ (TIMELINE) BÖLÜMÜ -->
+            <div class="love-card">
+                <h2 class="card-heading">Yolculuğumuz</h2>
+                <div class="heading-line"></div>
+                
+                <div class="timeline-container">
+                    <div class="timeline-item">
+                        <div class="timeline-date">15 Haziran 2025</div>
+                        <div class="timeline-title">İlk Tanışma ✨</div>
+                        <p style="font-size:0.85rem; color:#555;">Her şeyin başladığı, gözlerine ilk baktığım o an...</p>
+                        <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=500&q=80" class="timeline-img" alt="Tanışma">
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">28 Temmuz 2025</div>
+                        <div class="timeline-title">İlk Buluşmamız ☕</div>
+                        <p style="font-size:0.85rem; color:#555;">Heyecandan kahvemi döktüğüm o güzel gün :)</p>
+                        <img src="https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=500&q=80" class="timeline-img" alt="Buluşma">
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">10 Ağustos 2025</div>
+                        <div class="timeline-title">İlk Tatilimiz 🌅</div>
+                        <p style="font-size:0.85rem; color:#555;">Seninle geçen her gün bir tatil gibi zaten...</p>
+                        <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=500&q=80" class="timeline-img" alt="Tatil">
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOTOĞRAF GALERİSİ -->
+            <div class="love-card">
+                <h2 class="card-heading">En Güzel Anlarımız</h2>
+                <div class="heading-line"></div>
+                <div class="photo-grid">
+                    <img src="https://images.unsplash.com/photo-1621252179027-94459d278660?w=500&q=80" alt="Anı 1">
+                    <img src="https://images.unsplash.com/photo-1520698762580-0a5610bc1a81?w=500&q=80" alt="Anı 2">
+                    <img src="https://images.unsplash.com/photo-1533227260828-531c6c117c3c?w=500&q=80" alt="Anı 3">
+                    <img src="https://images.unsplash.com/photo-1518193498920-562ce7240c5f?w=500&q=80" alt="Anı 4">
+                    <img src="https://images.unsplash.com/photo-1518105779148-40b5c1a719ab?w=500&q=80" alt="Anı 5">
+                    <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=500&q=80" alt="Anı 6">
+                </div>
+            </div>
+
+            <!-- MÜŞTERİ BİLGİSİ: MEKTUP ALANI (YENİ EKLENDİ) -->
+            <!-- Satış sırasında müşteriye: "Buraya sevgilinize içinizden geçenleri yazdığınız uzun bir not/mektup ekliyoruz" diyebilirsin. -->
+            <div class="love-card">
+                <h2 class="card-heading">Kalbimden Geçenler</h2>
+                <div class="heading-line"></div>
+                <div class="text-letter-body">
+                   <p>Canım sevgilim,</p>
+                    <p>Seninle geçen her gün, hayatımın bana sunduğu en güzel hediye. Bazen kelimeler, sana olan sevgimi ve içimdeki tarifsiz mutluluğu anlatmaya yetersiz kalıyor.</p>
+                    <p>Bu özel sayfayı, aramızdaki o eşsiz bağı kutlamak, birlikte biriktirdiğimiz güzel anıları sonsuzlaştırmak ve sana küçük de olsa tebessüm ettirecek bir anı bırakmak için hazırladım.</p>
+                    <p class="special-ask">Seni dünyalar kadar çok seviyorum 🤍</p>
+                </div>
+            </div>
+
+            <!-- ZARF BUTONLARI VE BÜYÜK SÜRPRİZ -->
+            <div class="love-card">
+                <h2 class="card-heading">Hissiyat Zarfları</h2>
+                <div class="heading-line"></div>
+                <p style="font-size:0.85rem; color:#555; margin-bottom:10px;">Şu an nasıl hissediyorsun? Sana özel notunu aç.</p>
+                
+                <div class="envelope-grid">
+                    <button class="env-btn" onclick="openNote('Özlem')"><i class="fa-regular fa-envelope"></i> Beni Özlediğinde</button>
+                    <button class="env-btn" onclick="openNote('Üzüntü')"><i class="fa-regular fa-envelope-open"></i> Kötü Hissettiğinde</button>
+                    <button class="env-btn" onclick="openNote('Kızgınlık')"><i class="fa-solid fa-envelope-open-text"></i> Bana Kızdığında</button>
+                    <button class="env-btn" onclick="openNote('Mutluluk')"><i class="fa-solid fa-heart-envelope"></i> Sadece Mutluysan</button>
+                </div>
+                
+                <button onclick="showSurprise()" class="big-surprise-btn">
+                    <i class="fa-solid fa-gift"></i> Büyük Sürprizi Aç!
+                </button>
+            </div>
+
+        </div>
+
+        <footer class="copyright-bar">
+            © 2026. Buğra Kuş ©Buğrainc | VIP Tasarım
+        </footer>
+
+    </div>
+
+    <!-- Sürpriz Modal (Polaroid) -->
+    <div id="surpriseModal" class="modal-overlay">
+        <div class="modal-content">
+            <button onclick="closeModal('surpriseModal')" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="polaroid-wrapper">
+                <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&q=80" alt="Örnek Hediye Kutusu" class="polaroid-img">
+                <div class="polaroid-caption">Seni Çok Seviyorum...</div>
+            </div>
+            <p style="color:white; text-shadow: 1px 1px 3px black;">Gerçek hediyen için gözlerini kapat 😉</p>
+        </div>
+    </div>
+
+    <!-- Zarf Notları Modalı -->
+    <div id="noteModal" class="modal-overlay">
+        <div class="modal-content">
+            <button onclick="closeModal('noteModal')" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="note-card" id="noteText">
+                <!-- Metin JS ile buraya gelecek -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // VIP Arka Plan Kalp Yağışı
+        function createHeart() {
+            const heart = document.createElement('i');
+            heart.classList.add('fa-solid', 'fa-heart', 'heart-fall');
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 4 + 's';
+            heart.style.opacity = Math.random() * 0.5 + 0.2;
+            const size = Math.random() * 1.5 + 0.5;
+            heart.style.transform = `scale(${size})`;
+            
+            document.getElementById('hearts-container').appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 7000);
+        }
+        setInterval(createHeart, 500);
+
+        // Şifre ve Sayaç Sistemi
+        const relationshipStart = new Date(2025, 5, 15, 0, 0); 
+
+        function validateKey() {
+            if (document.getElementById('secretKey').value.trim() === "15haziran") {
+                document.getElementById('login-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('login-screen').style.display = "none";
+                    document.getElementById('main-content').style.display = "block";
+                    triggerCounter(); setInterval(triggerCounter, 1000); 
+                }, 500);
+            } else {
+                document.getElementById('wrongNotice').style.display = "block";
+            }
+        }
+
+        function triggerCounter() {
+            const diff = new Date() - relationshipStart; 
+            document.getElementById('val-days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+            document.getElementById('val-hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+            document.getElementById('val-mins').innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+            document.getElementById('val-secs').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0'); 
+        }
+
+        // Modallar ve Sürprizler
+        function showSurprise() {
+            var end = Date.now() + 3000;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff0844', '#ffb199', '#ffffff'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff4b72', '#ff7eb3', '#ffffff'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+            document.getElementById('surpriseModal').style.display = 'flex';
+        }
+
+        function openNote(type) {
+            let message = "";
+            if(type === 'Özlem') message = "Hemen gözlerini kapat ve sana sarıldığımı hisset. Ben de seni çok özledim, en kısa sürede yanındayım. ❤️";
+            if(type === 'Üzüntü') message = "Benim güzel sevgilim, o güzel yüzün hiç asılmasın. Sen gülünce benim dünyam aydınlanıyor. Seni dünyalar kadar seviyorum! 🌸";
+            if(type === 'Kızgınlık') message = "Biliyorum bazen odunluk yapabiliyorum... Ama kalbim hep seninle atıyor. Lütfen bana kızma, gülümse biraz. Affettin mi? 🥺";
+            if(type === 'Mutluluk') message = "Senin mutluluğun benim yaşam kaynağım! O güzel gülüşün yüzünden hiç eksik olmasın canımın içi. ✨";
+            
+            document.getElementById('noteText').innerText = message;
+            document.getElementById('noteModal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+    </script>
+</body>
+</html>
